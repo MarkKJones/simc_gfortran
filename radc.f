@@ -798,17 +798,17 @@ c     >			vertex%Pmx, vertex%Pmy, vertex%Pmz
 ! The extended peaking approximation
 
 	plus_term = 0.0
+	if (e1 .lt.0) e1= abs(e1)
 	if (plus_flag.eq.1 .and. itail.lt.3) then
 	  plus_term = log((1.-cos(th))/2.)
 
 ! ... only add in term due to ep interference if we're using proton
-! ... radiation
+! ... radiation 
 
 	  if (doing_proton) plus_term = plus_term + 2.*log(e1/e2)
 	endif
 
 ! Compute lambdas
-
 	if (itail.eq.1) then
 	  lambda_dave	= alpi*(2.*log(2.*e1/Me) -1. + plus_term)
 	else if (itail.eq.2) then  

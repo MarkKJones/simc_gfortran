@@ -168,6 +168,15 @@ C DJG Note that this means that +fry points down. I will make frx point left.
 	main%target%x = main%target%x+t5
 	main%target%y = main%target%y+t6
 	main%target%z = (0.5-grnd())*targ%length+targ%zoffset
+        if (targ%can .eq. 5) then ! loop2 w/o LH2 just walls
+	   if ( grnd() .gt. 0.5) then
+	      main%target%z = -5 + (0.5-grnd())*0.0150 ! entrance wall
+           else
+	      main%target%z = 5 + (0.5-grnd())*0.0191 ! sphere_wall
+           endif 
+	   main%target%z = main%target%z + targ%zoffset
+	   
+        endif
 	main%target%rastery = t6	!'raster' contribution to vert. pos.
 	main%target%rasterx = t5	! points right as you look downstream  - need to flip sign later.
 

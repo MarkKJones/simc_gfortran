@@ -52,6 +52,14 @@ c targ%can ==4 is loop2 2017 target
 	   inner_radius_2017 = 1.315*inch_cm ! cm
 	   outer_radius_2017 = inner_radius_2017+ sphere_wall_2017! cm
 	   endif
+	if (targ%can .eq. 5) then ! loop 2 w/o LH2
+	   liquid = .false. 
+	   entrance_wall_2017 = 0.0150 ! cm
+	   side_wall_2017 = 0.0219 ! cm
+	   sphere_wall_2017 = 0.0191 ! cm
+	   inner_radius_2017 = 1.315*inch_cm ! cm
+	   outer_radius_2017 = inner_radius_2017+ sphere_wall_2017! cm
+	   endif
 
 ! Which particle are we interested in?
 
@@ -68,6 +76,10 @@ c targ%can ==4 is loop2 2017 target
 	    s_Al = s_Al + 0.0050*inch_cm
 	  else if (targ%can .eq. 3 .or. targ%can .eq. 4) then	! 
 	    s_Al = s_Al + entrance_wall_2017
+	  else if (targ%can .eq. 5) then	! 
+	    if (zpos .lt. 0) s_Al = s_Al + entrance_wall_2017/2.+ (zpos+5)
+	    if (zpos .gt. 0) s_Al = s_Al + entrance_wall_2017 + sphere_wall_2017/2 + (zpos-5)
+	    s_target = 0
 	  endif
 	endif
 
@@ -181,6 +193,11 @@ c	       stop
 
 	endif		
 
+      if (targ%can .eq. 5) then
+	    if (zpos .lt. 0) s_Al = s_Al + entrance_wall_2017/2.- (zpos+5) + sphere_wall_2017
+	    if (zpos .gt. 0) s_Al = s_Al + sphere_wall_2017/2 + (zpos-5)
+	    s_target = 0	 
+      endif
 ! ... compute distance in radiation lengths and energy loss
 	radlen = s_target/targ%X0_cm + s_Al/X0_cm_Al + s_air/X0_cm_air +
      >		s_kevlar/X0_cm_kevlar + s_mylar/X0_cm_mylar
@@ -290,6 +307,24 @@ c	      stop
 	  endif
 
 	endif
+      if (targ%can .eq. 5) then
+	    if (zpos .lt. 0) then 
+	       s_Al = s_Al + entrance_wall_2017/2.- (zpos+5)
+	       can_len = 10 - inner_radius_2017
+	       zlen_before = 10
+	       if ( (zlen_before+inner_radius_2017/tan(theta)) .lt. can_len) then
+                s_al = s_al+ side_wall_2017
+               else ! goes thru the half-sphere cap
+		zlen = can_len - zlen_before
+		s_al = s_al+ sqrt(outer_radius_2017**2 - (zlen*sin(theta))**2)
+     >            - sqrt(inner_radius_2017**2 - (zlen*sin(theta))**2) 
+	       endif
+             endif	       
+	    if (zpos .gt. 0) then
+	       s_Al = s_Al + (sphere_wall_2017/2 - (zpos-5))/cos(theta)
+	    endif
+	    s_target = 0	 
+      endif
 
 ! ... compute energy losses
 
@@ -347,10 +382,20 @@ c	      stop
 	liquid = targ%Z.lt.2.4
 
 ! Incoming electron
+	if (targ%can .lt. 5) then
 	call trip_thru_target(1, z%max, ebeam, zero, targ%Eloss(1)%max,
      &                        targ%teff(1)%max, Me, 3)
 	call trip_thru_target(1, z%min, ebeam, zero, targ%Eloss(1)%min,
      &                        targ%teff(1)%min, Me, 2)
+	elseif (targ%can .eq. 5) then
+          z%max =  5 + 0.0150/2.
+          z%min = -5 + 0.0150/2.
+	call trip_thru_target(1, z%max, ebeam, zero, targ%Eloss(1)%max,
+     &                        targ%teff(1)%max, Me, 3)
+	call trip_thru_target(1, z%min, ebeam, zero, targ%Eloss(1)%min,
+     &                        targ%teff(1)%min, Me, 2)
+	   
+	   endif
 
 ! Scattered electron
 C Above a few MeV, the energy loss increases as a function of electron
@@ -362,11 +407,19 @@ C the perfect range, but it's easier than reproducing the generated limits here
 	energymax=pe%max
 ! ... solid target is infinitely wide
 	if (.not.liquid) then
+	if (targ%can .lt. 5) then
 	  call trip_thru_target(2, z%min, energymax, the%max,
      &           targ%Eloss(2)%max, targ%teff(2)%max, Me, 3)
 	  call trip_thru_target(2, z%max, energymin, the%min,
      &           targ%Eloss(2)%min, targ%teff(2)%min, Me, 2)
-
+	elseif (targ%can .eq. 5) then
+          z%min =  5 + 0.0150/2.
+          z%max = -5 + 0.0150/2.
+	  call trip_thru_target(2, z%min, energymax, the%max,
+     &           targ%Eloss(2)%max, targ%teff(2)%max, Me, 3)
+	  call trip_thru_target(2, z%max, energymin, the%min,
+     &           targ%Eloss(2)%min, targ%teff(2)%min, Me, 2)
+        endif
 ! ... liquid
 	else if (targ%can .eq. 1 ) then		!beer can
 	  if (z%max.ge.targ%length/2.) then
@@ -480,7 +533,8 @@ C the perfect range, but it's easier than reproducing the generated limits here
 	betap%max = pp%max / sqrt(pp%max**2 + m**2)
 ! ... solid target is infinitely wide
 	if (.not.liquid) then
-	  call trip_thru_target (3, z%min, energymin, thp%max, E1, t1, m, 3)
+          if(targ%can .lt. 5) then	  
+          call trip_thru_target (3, z%min, energymin, thp%max, E1, t1, m, 3)
 	  call trip_thru_target (3, z%min, energymax, thp%max, E2, t2, m, 3)
 	  targ%Eloss(3)%max = max(E1,E2)
 	  targ%teff(3)%max = max(t1,t2)
@@ -489,6 +543,19 @@ C the perfect range, but it's easier than reproducing the generated limits here
 	  call trip_thru_target (3, z%max, energymax, thp%min, E2, t2, m, 2)
 	  targ%Eloss(3)%min = min(E1,E2)
 	  targ%teff(3)%min = min(t1,t2)
+	  elseif (targ%can .eq. 5) then
+          z%min =  5 + 0.0150/2.
+          z%max = -5 + 0.0150/2.
+          call trip_thru_target (3, z%min, energymin, thp%max, E1, t1, m, 3)
+	  call trip_thru_target (3, z%min, energymax, thp%max, E2, t2, m, 3)
+	  targ%Eloss(3)%max = max(E1,E2)
+	  targ%teff(3)%max = max(t1,t2)
+
+	  call trip_thru_target (3, z%max, energymin, thp%min, E1, t1, m, 2)
+	  call trip_thru_target (3, z%max, energymax, thp%min, E2, t2, m, 2)
+	  targ%Eloss(3)%min = min(E1,E2)
+	  targ%teff(3)%min = min(t1,t2)
+	  endif
 
 ! ... liquid
 	else if (targ%can .eq. 1 ) then	!beer can

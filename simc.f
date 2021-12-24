@@ -10,7 +10,8 @@
 	implicit none
 !	include 'simulate_init.inc'
 	include 'simulate.inc'
-	include 'histograms_init.inc'
+!	include 'histograms_init.inc'
+	include 'histograms.inc'
 	include 'radc.inc'
 	include 'hbook.inc'
 	include 'sos/struct_sos.inc'
@@ -77,7 +78,7 @@ c
 
 ! ... set up some quantities that the radiative corrections routines will need
 ! ... N.B. Call this even if we're not using radiative corrections -- the
-! ... target thicknesses seen by the incoming and
+! ... target thicknesses seen by the incming and
 ! ... scattered particles (in radiation lengths) are determined here, and
 ! ... are needed for the multiple scattering calculations
 ! ... done in the Monte Carlos.
@@ -1547,10 +1548,10 @@ C DJG For spectrometers to the left of the beamline, need to pass ctheta,-stheta
 	recon%p%xptar = main%RECON%p%xptar
 	recon%p%z = main%RECON%p%z
              if (abs(spec%p%phi-pi/2) .le. 0.5) then ! SHMS = pi/2, HMS = 3pi/2
-	     xtemp = main%target%x*(cos(spec%p%theta) - recon%p%yptar*sin(spec%p%theta))
+	     xtemp = -main%target%x*(cos(spec%p%theta) - recon%p%yptar*sin(spec%p%theta))
 	     zhadron = -(recon%p%z+spec%p%offset%y-xtemp)/(sin(spec%p%theta) - recon%p%yptar*cos(spec%p%theta)) ! recon.p.z is really ytgt
 	     else
-	     xtemp = main%target%x*(cos(spec%p%theta) + recon%p%yptar*sin(spec%p%theta))
+	     xtemp = -main%target%x*(cos(spec%p%theta) + recon%p%yptar*sin(spec%p%theta))
 	     zhadron = -(recon%p%z+spec%p%offset%y-xtemp)/(-sin(spec%p%theta) - recon%p%yptar*cos(spec%p%theta)) ! recon.p.z is really ytgt
 	     endif
 	recon%p%P = spec%p%P*(1.+recon%p%delta/100.)

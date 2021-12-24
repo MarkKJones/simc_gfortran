@@ -240,6 +240,10 @@ c	  targ%Coulomb%max = targ%Coulomb_constant * 3.0
      >		sqrt(1.+SPedge%p%yptar%min**2) )
 	z%min = -0.5*targ%length
 	z%max =  0.5*targ%length
+	if ( targ%can .eq. 5) then
+	   z%min = -5
+	   z%max =  5
+        endif
 	call extreme_trip_thru_target(Ebeam, the_phys, thp_phys, edge%e%E,
      >                                pp, z, Mh)
 	if (.not.using_Eloss) then
