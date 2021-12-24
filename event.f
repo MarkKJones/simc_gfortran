@@ -847,7 +847,10 @@ c   atan2 = pi if p_new_y==0 p_new_x<0
 c   atan2 = pi/2 if p_new_x=0
 c
 	  if (main%phi_pq.lt.0.e0) main%phi_pq=main%phi_pq+2.*pi
-	  if ( .not. prod_in_cm) vertex%phicm = main%phi_pq
+	  if ( .not. prod_in_cm) then
+	     vertex%phicm = main%phi_pq+pi
+             if (vertex%phicm .gt. 2.*pi) vertex%phicm =vertex%phicm-2.*pi
+          endif
 !	  if (p_new_y.lt.0.) then
 !	    main.phi_pq = 2*pi - main.phi_pq
 !	  endif
@@ -1400,7 +1403,8 @@ c
 	else
 	   recon%phicm = 2.*3.1415-vangle(z_q,z_b,z_q,z_p)
         endif
-
+	 recon%phicm =  recon%phicm + 3.1415
+         if (recon%phicm .gt. 2*3.1415) recon%phicm = recon%phicm - 2*3.1415
 c
 	  gamma_cm= sqrt(recon%q*recon%q+recon%w*recon%w)/recon%w
 	  beta_cm = recon%q/ sqrt(recon%q*recon%q+recon%w*recon%w)
@@ -1899,7 +1903,8 @@ c
       else
         phi_p = 0.
       endif
-      phi_p = phi_p + pi ! since y-comp negative
+c      phi_p = phi_p + pi ! since y-comp negative
+      phi_p = phi_p 
       phi_p = phi_p + central_phi_spec_e ! rotate into the SIMC beam system +x points down,+y points to SOS,+z along beam.
       phi_e = phi_e + central_phi_spec_e ! rotate into the SIMC beam system +x points down,+y points to SOS,+z along beam.
 c
