@@ -22,7 +22,7 @@ begin parm kinematics_main
   Ebeam = 3056.			;  (MeV)
   dEbeam = 0.05			;  beam energy variation (%)
   electron_arm = 5              ;  1=hms,2=sos,3=hrsr,4=hrsl
-  hadron_arm = 1                ;  1=hms,2=sos,3=hrsr,4=hrsl
+  hadron_arm = 1              ;  1=hms,2=sos,3=hrsr,4=hrsl
   spec%e%P = 1300.0		;  e arm central momentum (MeV/c)
   spec%e%theta = 54.0		;  e arm angle setting (degrees)
   spec%p%P = 2520.0		;  p arm central momentum (MeV/c)
@@ -56,6 +56,10 @@ begin parm e_arm_accept
   SPedge%e%yptar%max =  50.0	;  yptar max = {TF} / 1000
   SPedge%e%xptar%min = -50.0	;  xptar min = {TF} / 1000 (mrad)
   SPedge%e%xptar%max =  50.0	;  xptar max = {TF} / 1000
+  shms_pad_1x_lo_num = 9
+  shms_pad_1x_hi_num = 13
+  shms_pad_2x_lo_num = 9
+  shms_pad_2x_hi_num = 14
 end parm e_arm_accept
 
 begin parm p_arm_accept

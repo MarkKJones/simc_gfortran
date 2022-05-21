@@ -203,3 +203,7 @@ C momentum distribution (nump=#/points, pval=p, mprob=integral (p^2 f(p) dp)
 
 ! ... and some variable blocks of general interest defined in external files
 	include 'target.inc'
+c
+	integer pad_1x_lo_num,pad_1x_hi_num,pad_2x_lo_num,pad_2x_hi_num
+	common /shms_scin_x_padcut/ pad_1x_lo_num,pad_1x_hi_num
+     >    ,pad_2x_lo_num,pad_2x_hi_num
