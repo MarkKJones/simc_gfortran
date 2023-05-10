@@ -122,8 +122,8 @@
 	type(event_main):: main
 	type(event):: vertex, orig
 
-	real*8 vxi,vyi,vzi
-	common /reconz/ vxi,vyi,vzi
+	real*8 vxi,vyi,vzi,vEin
+	common /reconz/ vxi,vyi,vzi,vEin
 
 	real*8 nsig_max
 	parameter(nsig_max=3.0e0)      !max #/sigma for gaussian ran #s.
@@ -193,6 +193,9 @@ C modified 5/15/06 for poinct
 	endif
 	vertex%Ein = Ebeam + (grnd()-0.5)*dEbeam +
      >		main%target%Coulomb - main%target%Eloss(1)
+
+	! corrected beam energy
+	vEin = vertex%Ein
 
 ! ... deterimine known variation in Ein from Ebeam_vertex_ave and in
 ! ... Ee due to Coulomb energy to compare limits to generated event by event.
