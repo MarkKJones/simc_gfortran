@@ -1,7 +1,19 @@
 ! TARGET.INC
 
 ! Constants
-
+! properties of Corning Glass 180
+	real*8		rho_Glass, Z_Glass, A_Glass, X0_Glass, X0_cm_Glass
+	parameter	(rho_Glass = 2.76)  !Z/A = 0.4829
+	parameter	(Z_Glass = 14.)  ! this gives the right ionization potential
+	parameter	(A_Glass = Z_Glass/.4829)
+	parameter	(X0_Glass = 19.425)
+	parameter	(X0_cm_Glass = X0_Glass/rho_Glass)
+	real*8		rho_Be, Z_Be, A_Be, X0_Be, X0_cm_Be
+	parameter	(rho_Be = 1.85)
+	parameter	(Z_Be = 4.)
+	parameter	(A_Be = 9.0121831)
+	parameter	(X0_Be = 65.19)
+	parameter	(X0_cm_Be = X0_Be/rho_Be)
 	real*8		rho_Al, Z_Al, A_Al, X0_Al, X0_cm_Al
 	parameter	(rho_Al = 2.70)
 	parameter	(Z_Al = 13.)

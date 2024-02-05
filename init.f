@@ -216,7 +216,6 @@ c	  targ%Coulomb%max = targ%Coulomb_constant * 3.0
 	SPedge%p%yptar%max = SPedge%p%yptar%max + slop%MC%p%yptar%used
 	SPedge%p%xptar%min = SPedge%p%xptar%min - slop%MC%p%xptar%used
 	SPedge%p%xptar%max = SPedge%p%xptar%max + slop%MC%p%xptar%used
-
 ! Compute TRUE edges -- distortions in the target come into play
 
 	edge%e%E%min = (1.+SPedge%e%delta%min/100.)*spec%e%P +
@@ -267,7 +266,6 @@ c	  targ%Coulomb%max = targ%Coulomb_constant * 3.0
 	edge%p%yptar%max = SPedge%p%yptar%max + targ%musc_max(3)
 	edge%p%xptar%min = SPedge%p%xptar%min - targ%musc_max(3)
 	edge%p%xptar%max = SPedge%p%xptar%max + targ%musc_max(3)
-
 ! Edges on values of Em and Pm BEFORE reconstruction% Need to apply slop to
 ! take into account all transformations from ORIGINAL TRUE values to
 ! RECONSTRUCTED TRUE values --> that includes: (a) reconstruction slop on
@@ -777,21 +775,30 @@ c	exponentiate = use_expon
      >		* gamma(one+lambda(3)) / gamma(one+g_int)
 
 ! External constants
-
 	do i = 1, 2
 	  c_ext(i) = bt(i)/e(i)**bt(i)/gamma(one+bt(i))
 	enddo
 	c_ext(3) = 0.0
 	g_ext = bt(1) + bt(2)
-	c_ext(0) = c_ext(1)*c_ext(2) * g_ext / bt(1)/bt(2)
-	c_ext(0) = c_ext(0)*gamma(one+bt(1))*gamma(one+bt(2))/gamma(one+g_ext)
+	if ( bt(2) .ne. 0) then
+            c_ext(0) = c_ext(1)*c_ext(2) * g_ext / bt(1)/bt(2)
+	     c_ext(0) = c_ext(0)*gamma(one+bt(1))*gamma(one+bt(2))/gamma(one+g_ext)
+	else 
+             c_ext(0) = c_ext(1)
+	endif
 
 ! Internal + external constants
 
+	if ( bt(2) .ne. 0) then
 	do i = 1, 2
 	  c(i) = c_int(i) * c_ext(i) * g(i)/lambda(i)/bt(i)
      >		* gamma(one+lambda(i))*gamma(one+bt(i))/gamma(one+g(i))
 	enddo
+        else
+	  c(1) = c_int(1) * c_ext(1) * g(1)/lambda(1)/bt(1)
+     >		* gamma(one+lambda(1))*gamma(one+bt(1))/gamma(one+g(1))
+	  c(2) = c_int(2)
+	   endif
 	c(3) = c_int(3)
 
 ! Finally, constant for combined tails

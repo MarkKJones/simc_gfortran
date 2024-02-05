@@ -1,5 +1,5 @@
 	subroutine trip_thru_target (narm, zpos, energy, theta, Eloss, radlen,
-     &                               mass, typeflag)
+     &                              mass, typeflag)
 
 	implicit none
 	include 'simulate.inc'
@@ -10,6 +10,7 @@
 	real*8 Eloss, radlen
 	real*8 forward_path, side_path
 	real*8 s_target, s_Al, s_kevlar, s_air, s_mylar	! distances travelled
+	real*8 s_Be,Eloss_Be,s_Glass,Eloss_Glass ! needed for 3He target
 	real*8 Eloss_target, Eloss_Al,Eloss_air		! energy losses
 	real*8 Eloss_kevlar,Eloss_mylar			! (temporary)
 	real*8 z_can,t,atmp,btmp,ctmp,costmp,th_can	!for the pudding-can target.
@@ -36,6 +37,10 @@
 	    s_Al = s_Al + 0.0028*inch_cm
 	  else if (targ%can .eq. 2) then	!pudding can (5 mil Al, for now)
 	    s_Al = s_Al + 0.0050*inch_cm
+	  else if (targ%can .eq. 3) then	! GMN Loop 1 LH2 (cm)
+	    s_Al = 0.0132 
+	  else if (targ%can .eq. 4) then	! GMN Loop 3 LD2 (cm)
+	    s_Al = 0.0119
 	  endif
 	endif
 
@@ -45,6 +50,21 @@
      &                  typeflag,Eloss_target)
 	call enerloss_new(s_Al,rho_Al,Z_Al,A_Al,energy,mass,typeflag,Eloss_Al)
 	Eloss = Eloss_target + Eloss_Al
+	if (targ%can .eq. 5) then	! GEN glass cell window
+	    s_Be = 0.01*inch_cm ! 10mil window
+	    s_Glass = 0.0150 ! cm
+	    s_Air = 16.2 ! cm
+   	    radlen = s_target/targ%X0_cm + s_Al/X0_cm_Al+ s_Be/X0_cm_Be
+   	    radlen = radlen + s_Glass/X0_cm_Glass+ s_Air/X0_cm_Air
+	    call enerloss_new(s_target,targ%rho,targ%Z,targ%A,energy,mass,
+     &                  typeflag,Eloss_target)
+	    call enerloss_new(s_Al,rho_Al,Z_Al,A_Al,energy,mass,typeflag,Eloss_Al)
+	    call enerloss_new(s_Be,rho_Be,Z_Be,A_Be,energy,mass,typeflag,Eloss_Be)
+	    call enerloss_new(s_Glass,rho_Glass,Z_Glass,A_Glass,energy,mass,
+     & typeflag,Eloss_Glass)
+	    call enerloss_new(s_Air,rho_Air,Z_Air,A_Air,energy,mass,typeflag,Eloss_Air)
+	    Eloss = Eloss_target + Eloss_Al+ Eloss_Be+ Eloss_Glass+ Eloss_Air
+	endif
 	return
 
 ! The scattered electron
@@ -66,6 +86,11 @@
 ! ... For SHMS, use SOS windows for now (just a space filler for now).
 
 20	continue
+	if (targ%can .ge. 3) then
+	   Eloss=0
+	   Radlen=0
+	   return
+	endif 
 	if (electron_arm.eq.1) then		!electron is in HMS
 	  s_Al = 0.016*inch_cm
 	  s_air = 15
@@ -90,7 +115,7 @@
  	  s_kevlar = 0.*inch_cm
 	  s_mylar = 0.010*inch_cm
 	  forward_path = (targ%length/2.-zpos) / abs(cos(theta-targ%angle))
-	else if (electron_arm.eq.5 .or. electron_arm.eq.6) then	!SHMS
+	else if (electron_arm.eq.5 .or. electron_arm.eq.6) then !SHMS
 	  s_Al = 0.008*inch_cm
 	  s_air = 15
  	  s_kevlar = 0.005*inch_cm
@@ -134,7 +159,6 @@ c	       stop
 	    endif
 	    s_Al = s_Al + 0.0050*inch_cm/abs(sin(target_pi/2 - (theta - th_can)))
 	  endif
-
 	endif		
 
 ! ... compute distance in radiation lengths and energy loss
@@ -150,12 +174,19 @@ c	       stop
 	call enerloss_new(s_mylar,rho_mylar,Z_mylar,A_mylar,energy,mass,
      &                    typeflag,Eloss_mylar)
 	Eloss = Eloss_target + Eloss_Al + Eloss_air + Eloss_kevlar + Eloss_mylar
+	  
+c
 
 	return
 
 ! The scattered proton
 
 30	continue
+	if (targ%can .ge. 3) then
+	   Eloss=0
+	   Radlen=0
+	   return
+	endif 
 	if (hadron_arm.eq.1) then		!proton in HMS
 	  s_Al = 0.016*inch_cm
 	  s_air = 15
@@ -476,12 +507,13 @@ C the perfect range, but it's easier than reproducing the generated limits here
 
 ! Extreme multiple scattering.  Use nominal beam energy rather than minimum
 !  (should be close enough)
-
+        targ%musc_max(2) = 0
+        targ%musc_max(3) = 0
 	call extreme_target_musc(ebeam,1.e0,
      >		targ%teff(1)%max,targ%musc_max(1),targ%musc_nsig_max)
-	call extreme_target_musc(pe%min,1.e0,
+	if (targ%teff(2)%max .ne. 0) call extreme_target_musc(pe%min,1.e0,
      >		targ%teff(2)%max,targ%musc_max(2),targ%musc_nsig_max)
-	call extreme_target_musc(pp%min,betap%min,
+	if (targ%teff(3)%max .ne. 0) call extreme_target_musc(pp%min,betap%min,
      >		targ%teff(3)%max,targ%musc_max(3),targ%musc_nsig_max)
 
 	return

@@ -1367,7 +1367,7 @@ c	enddo
 
 ! ... multiple scattering
 
-	if (mc_smear) then
+	if (mc_smear .and. main%target%teff(3) .gt.0) then
 	  beta = orig%p%p/orig%p%E
 	  call target_musc(orig%p%p, beta, main%target%teff(3), dangles)
 	else
@@ -1583,7 +1583,7 @@ C	  recon%p%delta = (recon%p%P-spec%p%P)/spec%p%P*100.
 
 ! ... multiple scattering
 
-	if (mc_smear) then
+	if (mc_smear.and. main%target%teff(2) .gt.0) then
 	  call target_musc(orig%e%p, beta_electron, main%target%teff(2), dangles)
 	else
 	  dangles(1)=0.0

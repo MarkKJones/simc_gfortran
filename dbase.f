@@ -429,7 +429,7 @@ C DJG:
 	    targ%angle = 0.0
 	    write(6,*) 'Forcing target angle to zero for cryotarget.'
 	  endif
-	  if (targ%can.ne.1 .and. targ%can.ne.2) stop 'bad targ.can value'
+	  if (targ%can.gt.5) stop 'bad targ.can value'
 	endif
 	if(sin(targ%angle) .gt. 0.85) then
 	  write(6,*) 'BAD targ.angle (0 is perp. to beam, +ve is rotated towards SOS)'
@@ -652,7 +652,7 @@ C DJG:
 
 
 ! ... initialize limits on generation, cuts, edges
-
+	write(*,*) ' call limits init'
 	call limits_init(H)
 
 ! ... some announcements
